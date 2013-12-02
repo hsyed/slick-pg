@@ -3,6 +3,7 @@ package com.github.tminglei
 import scala.reflect.runtime.universe.TypeTag
 
 package object slickpg {
+  type Struct = struct.Struct
   type Converter[FROM, TO] = utils.Converter[FROM, TO]
   type GenericJdbcType[T] = utils.GenericJdbcType[T]
 
