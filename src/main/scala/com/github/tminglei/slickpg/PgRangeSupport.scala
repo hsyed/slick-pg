@@ -14,12 +14,12 @@ trait PgRangeSupport extends range.PgRangeExtensions { driver: PostgresDriver =>
   private def toTimestamp(str: String) = new Timestamp(tsFormatter.parse(str).getTime)
   private def toSQLDate(str: String) = new Date(dateFormatter.parse(str).getTime)
 
-  trait RangeImplicits {
-    implicit val intRangeTypeMapper = new utils.GenericJdbcType[Range[Int]]("int4range", Range.mkRangeFn(_.toInt))
-    implicit val longRangeTypeMapper = new utils.GenericJdbcType[Range[Long]]("int8range", Range.mkRangeFn(_.toLong))
-    implicit val floatRangeTypeMapper = new utils.GenericJdbcType[Range[Float]]("numrange", Range.mkRangeFn(_.toFloat))
-    implicit val timestampRangeTypeMapper = new utils.GenericJdbcType[Range[Timestamp]]("tsrange", Range.mkRangeFn(toTimestamp))
-    implicit val dateRangeTypeMapper = new utils.GenericJdbcType[Range[Date]]("daterange", Range.mkRangeFn(toSQLDate))
+  trait RangeImplicits extends ImplicitConverters {
+    implicit val intRangeTypeMapper = new GenericJdbcType[Range[Int]]("int4range", _fromString = Range.mkFromString[Int])
+    implicit val longRangeTypeMapper = new GenericJdbcType[Range[Long]]("int8range", _fromString = Range.mkFromString[Long])
+    implicit val floatRangeTypeMapper = new GenericJdbcType[Range[Float]]("numrange", _fromString = Range.mkFromString[Float])
+    implicit val timestampRangeTypeMapper = new GenericJdbcType[Range[Timestamp]]("tsrange", _fromString = Range.mkFromString(Converter(toTimestamp)))
+    implicit val dateRangeTypeMapper = new GenericJdbcType[Range[Date]]("daterange", _fromString = Range.mkFromString(Converter(toSQLDate)))
 
     implicit def rangeColumnExtensionMethods[B0, Range[B0]](c: Column[Range[B0]])(
       implicit tm: JdbcType[B0], tm1: JdbcType[RANGEType[B0]]) = {

@@ -2,7 +2,7 @@ package com.github.tminglei.slickpg
 
 case class Range[T](start: T, end: T, edge: EdgeType = `[_,_)`) {
 
-  def as[A](convert: (T => A)): Range[A] = {
+  def as[A](implicit convert: Converter[T, A]): Range[A] = {
     new Range[A](convert(start), convert(end), edge)
   }
 
@@ -30,13 +30,13 @@ object Range {
   val `(_,_)Range`  = """\("?([^,]*)"?,[ ]*"?([^,]*)"?\)""".r   // matches: (_,_)
   val `[_,_]Range`  = """\["?([^,]*)"?,[ ]*"?([^,]*)"?\]""".r   // matches: [_,_]
 
-  def mkRangeFn[T](convert: (String => T)): (String => Range[T]) =
-    (str: String) => str match {
+  def mkFromString[T](implicit convert: Converter[String, T]): Converter[String, Range[T]] =
+    Converter((str: String) => str match {
       case `[_,_)Range`(start, end) => Range(convert(start), convert(end), `[_,_)`)
       case `(_,_]Range`(start, end) => Range(convert(start), convert(end), `(_,_]`)
       case `(_,_)Range`(start, end) => Range(convert(start), convert(end), `(_,_)`)
       case `[_,_]Range`(start, end) => Range(convert(start), convert(end), `[_,_]`)
-    }
+    })
 
   ///
   def mkWithLength[T](start: T, length: Double, edge: EdgeType = `[_,_)`) = {

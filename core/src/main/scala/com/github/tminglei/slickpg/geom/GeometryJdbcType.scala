@@ -58,9 +58,10 @@ class GeometryJdbcType[T <: Geometry](implicit tag: ClassTag[T]) extends JdbcTyp
     if (wkbWriterHolder.get == null) wkbWriterHolder.set(new WKBWriter(2, true))
     wkbWriterHolder.get.write(geom)
   }
-  private def fromBytes[T](bytes: Array[Byte]): T = {
+  private def fromBytes(bytes: Array[Byte]): T = {
     if (wkbReaderHolder.get == null) wkbReaderHolder.set(new WKBReader())
-    wkbReaderHolder.get.read(bytes).asInstanceOf[T]
+    wkbReaderHolder.get.read(bytes)
+      .asInstanceOf[T]
   }
 
   /** copy from [[org.postgis.PGgeometry#splitSRID]] */
